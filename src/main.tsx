@@ -10,7 +10,23 @@ import { mainnet, sepolia, polygon, optimism, arbitrum, base, bsc, avalanche, gn
 import { http } from 'wagmi'
 import type { Chain } from 'viem/chains'
 
-const baseChains: [Chain, ...Chain[]] = [mainnet, sepolia, polygon, optimism, arbitrum, base, bsc, avalanche, gnosis, plasma]
+// Custom Monad chain (not yet included in wagmi/chains)
+const monad: Chain = {
+  id: 143,
+  name: 'Monad',
+  // minimal Chain fields compatible with viem/wagmi
+  nativeCurrency: { name: 'Monad', symbol: 'MONAD', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://rpc3.monad.xyz'] },
+    public: { http: ['https://rpc3.monad.xyz'] },
+  },
+  blockExplorers: {
+    // replace with the official explorer URL if different
+    default: { name: 'Monad Explorer', url: 'https://explorer.monad.xyz' },
+  },
+}
+
+const baseChains: [Chain, ...Chain[]] = [mainnet, sepolia, polygon, optimism, arbitrum, base, bsc, avalanche, gnosis, plasma, monad]
 const baseTransports: Record<number, ReturnType<typeof http>> = {
   [mainnet.id]: http(),
   [sepolia.id]: http(),
@@ -22,6 +38,7 @@ const baseTransports: Record<number, ReturnType<typeof http>> = {
   [avalanche.id]: http(),
   [gnosis.id]: http(),
   [plasma.id]: http(),
+  [monad.id]: http('https://rpc3.monad.xyz'),
 }
 
 export const ChainsContext = createContext<{ addChain: (chain: Chain) => void; chains: Chain[] }>({ addChain: () => {}, chains: [] })
