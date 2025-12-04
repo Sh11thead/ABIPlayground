@@ -37,11 +37,11 @@ This document outlines the roadmap for improving the UI/UX and functionality of 
 ## Phase 3: Visual Polish & Advanced Features (Low Priority)
 **Goal**: Make it look professional and support power-user features.
 
-- [ ] **Visual Redesign**:
+- [x] **Visual Redesign**:
     - Modern UI components (Tailwind or custom CSS polish).
     - Dark Mode support.
     - Better loading states and toast notifications for transactions.
-- [ ] **Event Logs**:
+- [x] **Event Logs**:
     - Tab to view real-time contract events/logs.
-- [ ] **Transaction Simulation**:
+- [x] **Transaction Simulation**:
     - Simulate transactions before sending to check for reverts.
