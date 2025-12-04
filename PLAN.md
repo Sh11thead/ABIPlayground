@@ -16,7 +16,7 @@ This document outlines the roadmap for improving the UI/UX and functionality of 
         - **ERC20** (Existing, enhance with `permit`, `burn`).
         - **WETH / Wrapped Token** (`deposit`, `withdraw`).
         - **ERC721** (NFT Standard).
-- [ ] **Input Component Enhancements**:
+- [x] **Input Component Enhancements**:
     - **Boolean**: Use Switch/Checkbox instead of text input.
     - **Address**: Basic validation and formatting.
     - **Amount (uint)**: Add helper to toggle between Raw (Wei) and Formatted (Ether) input? (Maybe Phase 2).
@@ -24,12 +24,13 @@ This document outlines the roadmap for improving the UI/UX and functionality of 
 ## Phase 2: Intelligence & History (Medium Priority)
 **Goal**: Reduce repetitive manual entry and make the tool smarter.
 
-- [ ] **Address Book / History**:
+- [x] **Address Book / History**:
     - Auto-save recently used contract addresses and ABIs to `localStorage`.
     - Allow users to assign aliases to addresses (e.g., "Monad WETH").
-- [ ] **Smart Inputs**:
+- [x] **Smart Inputs**:
     - **Address Input**: Dropdown to select from "My Wallet" or "History".
     - **Unit Converter**: Helper for `uint256` to convert ETH <-> Wei.
+    - **Boolean**: Use Switch/Checkbox instead of text input.
 - [ ] **Explorer Integration (Optional/Advanced)**:
     - Fetch ABI automatically from Etherscan/Explorer API given an address.
 

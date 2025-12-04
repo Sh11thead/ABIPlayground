@@ -4,6 +4,8 @@ import { ConnectButton } from '@rainbow-me/rainbowkit'
 import { useAccount, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { ChainsContext } from './main'
 import { presets } from './abis'
+import { useAddressHistory } from './hooks/useAddressHistory'
+import { SmartInput } from './components/SmartInput'
 
 // 辅助：解析 ABI 中的 functions
 function parseFunctions(abi: any[]) {
@@ -39,11 +41,11 @@ function FunctionParamsForm({ inputs, onSubmit }: { inputs: any[]; onSubmit: (ar
           <label className="form-label">
             {input.name || `arg${idx}`} <span className="muted">({input.type})</span>
           </label>
-          <input
-            className="input"
-            placeholder={input.type === 'address' ? '0x...' : '参数，复杂结构请用 JSON'}
+          <SmartInput
+            type={input.type}
+            name={input.name || `arg${idx}`}
             value={values[input.name || `arg${idx}`] || ''}
-            onChange={(e) => handleChange(input.name || `arg${idx}`, e.target.value)}
+            onChange={(val) => handleChange(input.name || `arg${idx}`, val)}
           />
         </div>
       ))}
@@ -54,6 +56,7 @@ function FunctionParamsForm({ inputs, onSubmit }: { inputs: any[]; onSubmit: (ar
 function App() {
   const { isConnected, chainId } = useAccount()
   const { addChain } = useContext(ChainsContext)
+  const { history, addToHistory } = useAddressHistory()
 
   const [address, setAddress] = useState('')
   const [abiText, setAbiText] = useState('')
@@ -114,7 +117,18 @@ function App() {
         <h3 className="section-title">合约配置</h3>
         <div className="form-row">
           <label className="form-label">合约地址</label>
-          <input className="input" placeholder="0x..." value={address} onChange={(e) => setAddress(e.target.value)} />
+          <input
+            className="input"
+            placeholder="0x..."
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            list="address-history"
+          />
+          <datalist id="address-history">
+            {history.map((item, idx) => (
+              <option key={idx} value={item.address}>{item.alias || new Date(item.timestamp).toLocaleString()}</option>
+            ))}
+          </datalist>
         </div>
         <div className="form-row">
           <label className="form-label">ABI 模板</label>
@@ -188,7 +202,7 @@ function App() {
 
               {selectedFn.stateMutability === 'view' || selectedFn.stateMutability === 'pure' ? (
                 <div className="actions">
-                  <button className="btn primary" onClick={() => readResult.refetch?.()}>读取</button>
+                  <button className="btn primary" onClick={() => { addToHistory(address); readResult.refetch?.() }}>读取</button>
                   <div className="readout">
                     {readResult.isPending && <span>读取中...</span>}
                     {readResult.error && <span>错误：{(readResult.error as any).message}</span>}
@@ -203,6 +217,7 @@ function App() {
                     className="btn primary"
                     disabled={!isConnected || isPending}
                     onClick={() => {
+                      addToHistory(address)
                       const request: any = {
                         address: address as any,
                         abi: abi as any,
