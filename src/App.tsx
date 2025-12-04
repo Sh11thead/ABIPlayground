@@ -23,6 +23,25 @@ function parseFunctions(abi: any[]) {
 // 辅助：基于 function 的 inputs 生成表单字段
 function FunctionParamsForm({ inputs, onSubmit }: { inputs: any[]; onSubmit: (args: any[]) => void }) {
   const [values, setValues] = useState<Record<string, string>>({})
+
+  const handleChange = (key: string, value: string) => {
+    const newValues = { ...values, [key]: value }
+    setValues(newValues)
+
+    const args = inputs.map((input, idx) => {
+      const k = input.name || `arg${idx}`
+      const raw = newValues[k]
+      if (raw === undefined) return undefined
+      try {
+        if (raw.trim().startsWith('[') || raw.trim().startsWith('{')) {
+          return JSON.parse(raw)
+        }
+      } catch (e) { }
+      return raw
+    })
+    onSubmit(args)
+  }
+
   return (
     <div className="form-grid">
       {inputs.map((input, idx) => (
@@ -34,28 +53,10 @@ function FunctionParamsForm({ inputs, onSubmit }: { inputs: any[]; onSubmit: (ar
             className="input"
             placeholder={input.type === 'address' ? '0x...' : '参数，复杂结构请用 JSON'}
             value={values[input.name || `arg${idx}`] || ''}
-            onChange={(e) => setValues((v) => ({ ...v, [input.name || `arg${idx}`]: e.target.value }))}
+            onChange={(e) => handleChange(input.name || `arg${idx}`, e.target.value)}
           />
         </div>
       ))}
-      <div className="actions">
-        <button className="btn primary" onClick={() => {
-          const args = inputs.map((input, idx) => {
-            const key = input.name || `arg${idx}`
-            const raw = values[key]
-            if (raw === undefined) return undefined
-            try {
-              if (raw.trim().startsWith('[') || raw.trim().startsWith('{')) {
-                return JSON.parse(raw)
-              }
-            } catch (e) {}
-            return raw
-          })
-          onSubmit(args)
-        }}>
-          设置参数
-        </button>
-      </div>
     </div>
   )
 }
@@ -146,7 +147,7 @@ function App() {
             <ul className="list">
               {viewFns.map((fn, idx) => (
                 <li key={idx}>
-                  <button className="btn ghost" onClick={() => setSelectedFn(fn)}>{fn.name}</button>
+                  <button className="btn ghost" onClick={() => { setSelectedFn(fn); setArgs([]) }}>{fn.name}</button>
                 </li>
               ))}
             </ul>
@@ -156,7 +157,7 @@ function App() {
             <ul className="list">
               {writeFns.map((fn, idx) => (
                 <li key={idx}>
-                  <button className="btn ghost" onClick={() => setSelectedFn(fn)}>{fn.name}</button>
+                  <button className="btn ghost" onClick={() => { setSelectedFn(fn); setArgs([]) }}>{fn.name}</button>
                 </li>
               ))}
             </ul>
@@ -167,7 +168,7 @@ function App() {
       {selectedFn && (
         <section className="card">
           <h3 className="section-title">Selected: {selectedFn.name} <span className="muted">({selectedFn.stateMutability})</span></h3>
-          <FunctionParamsForm inputs={selectedFn.inputs || []} onSubmit={setArgs} />
+          <FunctionParamsForm key={selectedFn.name} inputs={selectedFn.inputs || []} onSubmit={setArgs} />
 
           {selectedFn.stateMutability === 'payable' && (
             <div className="form-row">

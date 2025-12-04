@@ -17,34 +17,26 @@ export async function sendSignedRawTxWithParityFix(
   signedRawTx: string
 ) {
   // Parse signed raw tx to extract r, s, v
-  const parsed = ethers.utils.parseTransaction(signedRawTx)
-  if (!parsed.r || !parsed.s || parsed.v === undefined) {
-    throw new Error('signedRawTx did not contain r/s/v')
+  const parsed = ethers.Transaction.from(signedRawTx)
+  if (!parsed.signature) {
+    throw new Error('signedRawTx did not contain signature')
   }
 
   // Normalize parity to 0 or 1
-  const parity = Number(parsed.v) % 2
+  const yParity = parsed.signature.yParity
 
-  // Ensure unsignedTx has needed fields for serialization
-  const txForSerialize = {
-    to: unsignedTx.to,
-    nonce: unsignedTx.nonce,
-    value: unsignedTx.value ?? 0,
-    gasLimit: unsignedTx.gasLimit,
-    type: 2,
-    chainId: unsignedTx.chainId,
-    maxFeePerGas: unsignedTx.maxFeePerGas,
-    maxPriorityFeePerGas: unsignedTx.maxPriorityFeePerGas,
-    data: unsignedTx.data ?? '0x',
-  }
+  // Create a new transaction with the correct signature
+  const newTx = ethers.Transaction.from({
+    ...unsignedTx,
+    to: unsignedTx.to as string,
+    signature: {
+      r: parsed.signature.r,
+      s: parsed.signature.s,
+      v: yParity, // Force v to be yParity (0 or 1)
+    },
+  } as any)
 
-  const raw = ethers.utils.serializeTransaction(txForSerialize as any, {
-    r: parsed.r,
-    s: parsed.s,
-    v: parity,
-  })
-
-  return provider.sendTransaction(raw)
+  return provider.broadcastTransaction(newTx.serialized)
 }
 
 export type SendSignedRawTxWithParityFix = typeof sendSignedRawTxWithParityFix
