@@ -98,8 +98,7 @@ body {
   border-radius: 14px;
   padding: 16px;
   margin: 16px 0;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  backdrop-filter: saturate(1.1) blur(8px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.03);
 }
 .section-title {
   margin: 0 0 12px 0;
@@ -256,4 +255,95 @@ body {
 }
 .modalBody {
   padding: 16px;
+}
+
+/* Layout Refactor */
+.main-layout {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  margin-top: 24px;
+}
+
+.sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.content {
+  flex: 1;
+  min-width: 0; /* Prevent flex overflow */
+}
+
+.sidebar-section {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.sidebar-title {
+  margin: 0 0 12px 4px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #888;
+  font-weight: 600;
+}
+
+.fn-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fn-btn {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  color: inherit;
+  transition: all 0.2s;
+  font-family: monospace;
+}
+
+.fn-btn:hover {
+  background: var(--surface-2);
+}
+
+.fn-btn.active {
+  background: var(--accent);
+  color: white;
+}
+
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  background: var(--surface);
+  border-radius: 14px;
+  border: 2px dashed var(--border);
+  color: #888;
+}
+
+/* Adjustments for mobile */
+@media (max-width: 768px) {
+  .main-layout {
+    flex-direction: column;
+  }
+  .sidebar {
+    width: 100%;
+  }
 }
