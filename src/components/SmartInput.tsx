@@ -1,4 +1,5 @@
 import { parseEther, formatEther } from 'viem'
+import { AddressInput } from './AddressInput'
 
 interface SmartInputProps {
   type: string
@@ -63,6 +64,17 @@ export function SmartInput({ type, value, onChange }: SmartInputProps) {
           </button>
         </div>
       </div>
+    )
+  }
+
+  // Handle address
+  if (type === 'address') {
+    return (
+      <AddressInput
+        value={value}
+        onChange={onChange}
+        placeholder="0x..."
+      />
     )
   }
 

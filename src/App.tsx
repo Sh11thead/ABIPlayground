@@ -7,6 +7,7 @@ import { ChainsContext } from './main'
 import { presets } from './abis'
 import { useAddressHistory } from './hooks/useAddressHistory'
 import { SmartInput } from './components/SmartInput'
+import { AddressInput } from './components/AddressInput'
 import { ToastContainer, useToast } from './components/Toast'
 import { EventLogger } from './components/EventLogger'
 
@@ -63,7 +64,7 @@ function FunctionParamsForm({ inputs, onSubmit }: { inputs: any[]; onSubmit: (ar
 function App() {
   const { isConnected, chainId } = useAccount()
   const { addChain } = useContext(ChainsContext)
-  const { history, addToHistory } = useAddressHistory()
+  const { addToHistory } = useAddressHistory()
   const { toasts, addToast, removeToast } = useToast()
 
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
@@ -179,18 +180,10 @@ function App() {
         <h3 className="section-title">合约配置</h3>
         <div className="form-row">
           <label className="form-label">合约地址</label>
-          <input
-            className="input"
-            placeholder="0x..."
+          <AddressInput
             value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            list="address-history"
+            onChange={setAddress}
           />
-          <datalist id="address-history">
-            {history.map((item, idx) => (
-              <option key={idx} value={item.address}>{item.alias || new Date(item.timestamp).toLocaleString()}</option>
-            ))}
-          </datalist>
         </div>
         <div className="form-row">
           <label className="form-label">ABI 模板</label>
