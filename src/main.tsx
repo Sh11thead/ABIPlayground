@@ -26,7 +26,20 @@ const monad: Chain = {
   },
 }
 
-const baseChains: [Chain, ...Chain[]] = [mainnet, sepolia, polygon, optimism, arbitrum, base, bsc, avalanche, gnosis, plasma, monad]
+const hyperevm: Chain = {
+  id: 999,
+  name: 'HyperEVM',
+  nativeCurrency: { name: 'HYPE', symbol: 'HYPE', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://rpc.hyperliquid.xyz/evm'] },
+    public: { http: ['https://rpc.hyperliquid.xyz/evm'] },
+  },
+  blockExplorers: {
+    default: { name: 'HyperLiquid Explorer', url: 'https://hyperevmscan.io/' },
+  },
+}
+
+const baseChains: [Chain, ...Chain[]] = [mainnet, sepolia, polygon, optimism, arbitrum, base, bsc, avalanche, gnosis, plasma, monad, hyperevm]
 const baseTransports: Record<number, ReturnType<typeof http>> = {
   [mainnet.id]: http(),
   [sepolia.id]: http(),
@@ -39,6 +52,7 @@ const baseTransports: Record<number, ReturnType<typeof http>> = {
   [gnosis.id]: http(),
   [plasma.id]: http(),
   [monad.id]: http('https://rpc3.monad.xyz'),
+  [hyperevm.id]: http('https://rpc.hyperliquid.xyz/evm'),
 }
 
 export const ChainsContext = createContext<{ addChain: (chain: Chain) => void; chains: Chain[] }>({ addChain: () => {}, chains: [] })
