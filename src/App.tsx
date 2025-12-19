@@ -176,7 +176,9 @@ function App() {
             <button
               className="btn"
               onClick={() => {
-                const baseUrl = chain.blockExplorers.default.url.replace(/\/$/, '')
+                const url = chain?.blockExplorers?.default?.url
+                if (!url) return
+                const baseUrl = url.replace(/\/$/, '')
                 window.open(`${baseUrl}/address/${userAddress}`, '_blank')
               }}
             >
