@@ -62,7 +62,7 @@ function FunctionParamsForm({ inputs, onSubmit }: { inputs: any[]; onSubmit: (ar
 }
 
 function App() {
-  const { isConnected, chainId } = useAccount()
+  const { isConnected, chainId, address: userAddress, chain } = useAccount()
   const { addChain } = useContext(ChainsContext)
   const { addToHistory } = useAddressHistory()
   const { toasts, addToast, removeToast } = useToast()
@@ -172,6 +172,17 @@ function App() {
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
           <button className="btn" onClick={() => setShowAddChain(true)}>添加网络</button>
+          {isConnected && userAddress && chain?.blockExplorers?.default?.url && (
+            <button
+              className="btn"
+              onClick={() => {
+                const baseUrl = chain.blockExplorers.default.url.replace(/\/$/, '')
+                window.open(`${baseUrl}/address/${userAddress}`, '_blank')
+              }}
+            >
+              浏览器
+            </button>
+          )}
           <ConnectButton />
         </div>
       </header>

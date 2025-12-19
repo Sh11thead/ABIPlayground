@@ -10,6 +10,16 @@ import { mainnet, sepolia, polygon, optimism, arbitrum, base, bsc, avalanche, gn
 import { http } from 'wagmi'
 import type { Chain } from 'viem/chains'
 
+const emojis = ['🌈', '🦄', '🌊', '🌋', '🌍', '🔥', '✨', '🎲', '🎯', '🎨', '🚀', '🌟', '🌀', '🗿']
+function getChainIcon(name: string) {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  const emoji = emojis[Math.abs(hash) % emojis.length]
+  return `data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>${emoji}</text></svg>`
+}
+
 // Custom Monad chain (not yet included in wagmi/chains)
 const monad: Chain = {
   id: 143,
@@ -24,6 +34,8 @@ const monad: Chain = {
     // replace with the official explorer URL if different
     default: { name: 'Monad Explorer', url: 'https://explorer.monad.xyz' },
   },
+  // @ts-ignore
+  iconUrl: getChainIcon('Monad'),
 }
 
 const hyperevm: Chain = {
@@ -37,9 +49,28 @@ const hyperevm: Chain = {
   blockExplorers: {
     default: { name: 'HyperLiquid Explorer', url: 'https://hyperevmscan.io/' },
   },
+  // @ts-ignore
+  iconUrl: getChainIcon('HyperEVM'),
 }
 
-const baseChains: [Chain, ...Chain[]] = [mainnet, sepolia, polygon, optimism, arbitrum, base, bsc, avalanche, gnosis, plasma, monad, hyperevm]
+const unichain: Chain = {
+  id: 130,
+  name: 'Unichain',
+  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://unichain-rpc.publicnode.com'] },
+    public: { http: ['https://unichain-rpc.publicnode.com'] },
+  },
+  blockExplorers: {
+    default: { name: 'Uniscan', url: 'https://uniscan.xyz/' },
+  },
+  // @ts-ignore
+  iconUrl: getChainIcon('Unichain'),
+}
+
+const plasmaWithIcon = { ...plasma, iconUrl: getChainIcon('Plasma') }
+
+const baseChains: [Chain, ...Chain[]] = [mainnet, sepolia, polygon, optimism, arbitrum, base, bsc, avalanche, gnosis, plasmaWithIcon, monad, hyperevm, unichain]
 const baseTransports: Record<number, ReturnType<typeof http>> = {
   [mainnet.id]: http(),
   [sepolia.id]: http(),
@@ -53,6 +84,7 @@ const baseTransports: Record<number, ReturnType<typeof http>> = {
   [plasma.id]: http(),
   [monad.id]: http('https://rpc3.monad.xyz'),
   [hyperevm.id]: http('https://rpc.hyperliquid.xyz/evm'),
+  [unichain.id]: http('https://unichain-rpc.publicnode.com'),
 }
 
 export const ChainsContext = createContext<{ addChain: (chain: Chain) => void; chains: Chain[] }>({ addChain: () => {}, chains: [] })
