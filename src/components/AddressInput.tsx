@@ -6,11 +6,12 @@ interface AddressInputProps {
   value: string
   onChange: (val: string) => void
   placeholder?: string
+  historyKey?: string
 }
 
-export function AddressInput({ value, onChange, placeholder }: AddressInputProps) {
+export function AddressInput({ value, onChange, placeholder, historyKey }: AddressInputProps) {
   const { address: myAddress, isConnected } = useAccount()
-  const { history } = useAddressHistory()
+  const { history } = useAddressHistory(historyKey)
   const [isOpen, setIsOpen] = useState(false)
   const wrapperRef = useRef<HTMLDivElement>(null)
 

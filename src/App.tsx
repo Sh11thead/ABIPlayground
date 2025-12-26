@@ -64,7 +64,8 @@ function FunctionParamsForm({ inputs, onSubmit }: { inputs: any[]; onSubmit: (ar
 function App() {
   const { isConnected, chainId, address: userAddress, chain } = useAccount()
   const { addChain } = useContext(ChainsContext)
-  const { addToHistory } = useAddressHistory()
+  const { addToHistory: addContractHistory, clearHistory: clearContractHistory } = useAddressHistory('abiPlayground_contract_history')
+  const { addToHistory: addParamHistory, clearHistory: clearParamHistory } = useAddressHistory('abiPlayground_param_history')
   const { toasts, addToast, removeToast } = useToast()
 
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
@@ -87,9 +88,14 @@ function App() {
     setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))
   }
 
-  const [address, setAddress] = useState('')
-  const [abiText, setAbiText] = useState('')
-  const [presetName, setPresetName] = useState<keyof typeof presets | 'Custom'>('ERC20')
+  const [address, setAddress] = useState(() => localStorage.getItem('abiPlayground_address') || '')
+  const [abiText, setAbiText] = useState(() => localStorage.getItem('abiPlayground_abiText') || '')
+  const [presetName, setPresetName] = useState<keyof typeof presets | 'Custom'>(() => (localStorage.getItem('abiPlayground_presetName') as any) || 'ERC20')
+
+  useEffect(() => { localStorage.setItem('abiPlayground_address', address) }, [address])
+  useEffect(() => { localStorage.setItem('abiPlayground_abiText', abiText) }, [abiText])
+  useEffect(() => { localStorage.setItem('abiPlayground_presetName', presetName) }, [presetName])
+
   const [selectedFn, setSelectedFn] = useState<any | null>(null)
   const [selectedEvent, setSelectedEvent] = useState<any | null>(null)
   const [activeTab, setActiveTab] = useState<'functions' | 'events'>('functions')
@@ -162,6 +168,20 @@ function App() {
     }
   }, [wait.isSuccess, wait.error])
 
+  const clearCache = () => {
+    if (confirm('确定要清除所有缓存数据（包括历史记录）吗？')) {
+      localStorage.removeItem('abiPlayground_address')
+      localStorage.removeItem('abiPlayground_abiText')
+      localStorage.removeItem('abiPlayground_presetName')
+      clearContractHistory()
+      clearParamHistory()
+      setAddress('')
+      setAbiText('')
+      setPresetName('ERC20')
+      addToast('缓存已清除', 'success')
+    }
+  }
+
   return (
     <div className="container">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
@@ -171,6 +191,7 @@ function App() {
           <button className="theme-toggle" onClick={toggleTheme} title="Toggle Theme">
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
+          <button className="btn" onClick={clearCache} title="清除缓存">🗑️</button>
           <button className="btn" onClick={() => setShowAddChain(true)}>添加网络</button>
           {isConnected && userAddress && chain?.blockExplorers?.default?.url && (
             <button
@@ -196,6 +217,7 @@ function App() {
           <AddressInput
             value={address}
             onChange={setAddress}
+            historyKey="abiPlayground_contract_history"
           />
         </div>
         <div className="form-row">
@@ -306,7 +328,15 @@ function App() {
 
                 {selectedFn.stateMutability === 'view' || selectedFn.stateMutability === 'pure' ? (
                   <div className="actions">
-                    <button className="btn primary" onClick={() => { addToHistory(address); readResult.refetch?.() }}>读取</button>
+                    <button className="btn primary" onClick={() => {
+                      addContractHistory(address)
+                      args.forEach(arg => {
+                        if (typeof arg === 'string' && arg.startsWith('0x') && arg.length === 42) {
+                          addParamHistory(arg)
+                        }
+                      })
+                      readResult.refetch?.()
+                    }}>读取</button>
                     <div className="readout">
                       {readResult.isPending && <span>读取中...</span>}
                       {readResult.error && <span>错误：{(readResult.error as any).message}</span>}
@@ -321,7 +351,12 @@ function App() {
                       className="btn primary"
                       disabled={!isConnected || isPending || !!simulateError}
                       onClick={() => {
-                        addToHistory(address)
+                        addContractHistory(address)
+                        args.forEach(arg => {
+                          if (typeof arg === 'string' && arg.startsWith('0x') && arg.length === 42) {
+                            addParamHistory(arg)
+                          }
+                        })
                         const request: any = {
                           address: address as any,
                           abi: abi as any,

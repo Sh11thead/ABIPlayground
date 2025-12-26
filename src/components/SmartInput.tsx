@@ -74,6 +74,7 @@ export function SmartInput({ type, value, onChange }: SmartInputProps) {
         value={value}
         onChange={onChange}
         placeholder="0x..."
+        historyKey="abiPlayground_param_history"
       />
     )
   }

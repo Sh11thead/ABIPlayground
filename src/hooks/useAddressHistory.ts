@@ -6,11 +6,11 @@ export interface HistoryItem {
   timestamp: number
 }
 
-export function useAddressHistory() {
+export function useAddressHistory(storageKey: string = 'abiPlayground_history') {
   const [history, setHistory] = useState<HistoryItem[]>([])
 
   useEffect(() => {
-    const stored = localStorage.getItem('abiPlayground_history')
+    const stored = localStorage.getItem(storageKey)
     if (stored) {
       try {
         setHistory(JSON.parse(stored))
@@ -18,7 +18,7 @@ export function useAddressHistory() {
         console.error('Failed to parse history', e)
       }
     }
-  }, [])
+  }, [storageKey])
 
   const addToHistory = (address: string, alias?: string) => {
     if (!address || address.length < 40) return
@@ -28,10 +28,15 @@ export function useAddressHistory() {
       const newItem = { address, alias, timestamp: Date.now() }
       // Add to top, keep max 10
       const newHistory = [newItem, ...filtered].slice(0, 10)
-      localStorage.setItem('abiPlayground_history', JSON.stringify(newHistory))
+      localStorage.setItem(storageKey, JSON.stringify(newHistory))
       return newHistory
     })
   }
 
-  return { history, addToHistory }
+  const clearHistory = () => {
+    setHistory([])
+    localStorage.removeItem(storageKey)
+  }
+
+  return { history, addToHistory, clearHistory }
 }
