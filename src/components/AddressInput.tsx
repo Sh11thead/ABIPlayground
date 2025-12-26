@@ -31,6 +31,8 @@ export function AddressInput({ value, onChange, placeholder, historyKey }: Addre
     setIsOpen(false)
   }
 
+  const currentAlias = history.find(item => item.address.toLowerCase() === value.toLowerCase())?.alias
+
   return (
     <div className="address-input-wrapper" ref={wrapperRef}>
       <div className="input-group">
@@ -41,6 +43,11 @@ export function AddressInput({ value, onChange, placeholder, historyKey }: Addre
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setIsOpen(true)}
         />
+        {currentAlias && (
+          <div className="input-alias-badge" title={currentAlias}>
+            {currentAlias}
+          </div>
+        )}
         <button
           className="btn-icon"
           onClick={() => setIsOpen(!isOpen)}

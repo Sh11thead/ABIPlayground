@@ -8,6 +8,7 @@ import { presets } from './abis'
 import { useAddressHistory } from './hooks/useAddressHistory'
 import { SmartInput } from './components/SmartInput'
 import { AddressInput } from './components/AddressInput'
+import { AddressBookModal } from './components/AddressBookModal'
 import { ToastContainer, useToast } from './components/Toast'
 import { EventLogger } from './components/EventLogger'
 
@@ -64,11 +65,29 @@ function FunctionParamsForm({ inputs, onSubmit }: { inputs: any[]; onSubmit: (ar
 function App() {
   const { isConnected, chainId, address: userAddress, chain } = useAccount()
   const { addChain } = useContext(ChainsContext)
-  const { addToHistory: addContractHistory, clearHistory: clearContractHistory } = useAddressHistory('abiPlayground_contract_history')
-  const { addToHistory: addParamHistory, clearHistory: clearParamHistory } = useAddressHistory('abiPlayground_param_history')
+
+  const {
+    history: contractHistory,
+    addToHistory: addContractHistory,
+    updateAlias: updateContractAlias,
+    removeAddress: removeContractAddress,
+    importHistory: importContractHistory,
+    clearHistory: clearContractHistory
+  } = useAddressHistory('abiPlayground_contract_history')
+
+  const {
+    history: paramHistory,
+    addToHistory: addParamHistory,
+    updateAlias: updateParamAlias,
+    removeAddress: removeParamAddress,
+    importHistory: importParamHistory,
+    clearHistory: clearParamHistory
+  } = useAddressHistory('abiPlayground_param_history')
+
   const { toasts, addToast, removeToast } = useToast()
 
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [showAddressBook, setShowAddressBook] = useState(false)
 
   useEffect(() => {
     const stored = localStorage.getItem('theme') as 'light' | 'dark'
@@ -191,6 +210,7 @@ function App() {
           <button className="theme-toggle" onClick={toggleTheme} title="Toggle Theme">
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
+          <button className="btn" onClick={() => setShowAddressBook(true)} title="地址簿">📖</button>
           <button className="btn" onClick={clearCache} title="清除缓存">🗑️</button>
           <button className="btn" onClick={() => setShowAddChain(true)}>添加网络</button>
           {isConnected && userAddress && chain?.blockExplorers?.default?.url && (
@@ -410,6 +430,20 @@ function App() {
           )}
         </main>
       </div>
+
+      {showAddressBook && (
+        <AddressBookModal
+          onClose={() => setShowAddressBook(false)}
+          contractHistory={contractHistory}
+          paramHistory={paramHistory}
+          onUpdateContractAlias={updateContractAlias}
+          onUpdateParamAlias={updateParamAlias}
+          onRemoveContract={removeContractAddress}
+          onRemoveParam={removeParamAddress}
+          onImportContract={importContractHistory}
+          onImportParam={importParamHistory}
+        />
+      )}
 
       {showAddChain && (
         <div className="modalOverlay" onClick={() => setShowAddChain(false)}>
