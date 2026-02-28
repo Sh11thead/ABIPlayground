@@ -11,6 +11,7 @@ import { AddressInput } from './components/AddressInput'
 import { AddressBookModal } from './components/AddressBookModal'
 import { ToastContainer, useToast } from './components/Toast'
 import { EventLogger } from './components/EventLogger'
+import { RpcManagerModal } from './components/RpcManagerModal'
 
 // 辅助：解析 ABI 中的 functions
 function parseFunctions(abi: any[]) {
@@ -88,6 +89,7 @@ function App() {
 
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [showAddressBook, setShowAddressBook] = useState(false)
+  const [showRpcManager, setShowRpcManager] = useState(false)
 
   useEffect(() => {
     const stored = localStorage.getItem('theme') as 'light' | 'dark'
@@ -192,6 +194,7 @@ function App() {
       localStorage.removeItem('abiPlayground_address')
       localStorage.removeItem('abiPlayground_abiText')
       localStorage.removeItem('abiPlayground_presetName')
+      localStorage.removeItem('abiPlayground_rpcOverrides')
       clearContractHistory()
       clearParamHistory()
       setAddress('')
@@ -211,6 +214,7 @@ function App() {
             {theme === 'dark' ? '☀️' : '🌙'}
           </button>
           <button className="btn" onClick={() => setShowAddressBook(true)} title="地址簿">📖</button>
+          <button className="btn" onClick={() => setShowRpcManager(true)} title="RPC 管理">🔗</button>
           <button className="btn" onClick={clearCache} title="清除缓存">🗑️</button>
           <button className="btn" onClick={() => setShowAddChain(true)}>添加网络</button>
           {isConnected && userAddress && chain?.blockExplorers?.default?.url && (
@@ -529,6 +533,10 @@ function App() {
             </div>
           </div>
         </div>
+      )}
+
+      {showRpcManager && (
+        <RpcManagerModal onClose={() => setShowRpcManager(false)} />
       )}
     </div>
   )

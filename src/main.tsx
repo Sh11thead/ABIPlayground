@@ -70,7 +70,7 @@ const unichain: Chain = {
 
 const plasmaWithIcon = { ...plasma, iconUrl: getChainIcon('Plasma') }
 
-const baseChains: [Chain, ...Chain[]] = [mainnet, sepolia, polygon, optimism, arbitrum, base, bsc, avalanche, gnosis, plasmaWithIcon, monad, hyperevm, unichain]
+export const baseChains: [Chain, ...Chain[]] = [mainnet, sepolia, polygon, optimism, arbitrum, base, bsc, avalanche, gnosis, plasmaWithIcon, monad, hyperevm, unichain]
 const baseTransports: Record<number, ReturnType<typeof http>> = {
   [mainnet.id]: http(),
   [sepolia.id]: http(),
@@ -87,16 +87,62 @@ const baseTransports: Record<number, ReturnType<typeof http>> = {
   [unichain.id]: http('https://unichain-rpc.publicnode.com'),
 }
 
-export const ChainsContext = createContext<{ addChain: (chain: Chain) => void; chains: Chain[] }>({ addChain: () => {}, chains: [] })
+const RPC_OVERRIDES_KEY = 'abiPlayground_rpcOverrides'
+
+function loadRpcOverrides(): Record<number, string> {
+  try {
+    const raw = localStorage.getItem(RPC_OVERRIDES_KEY)
+    if (raw) return JSON.parse(raw)
+  } catch (e) { }
+  return {}
+}
+
+function saveRpcOverrides(overrides: Record<number, string>) {
+  localStorage.setItem(RPC_OVERRIDES_KEY, JSON.stringify(overrides))
+}
+
+function getDefaultRpcForChain(chainId: number, allChains: Chain[]): string {
+  const chain = allChains.find((c) => c.id === chainId)
+  return chain?.rpcUrls?.default?.http?.[0] || ''
+}
+
+interface ChainsContextType {
+  addChain: (chain: Chain) => void
+  chains: Chain[]
+  updateRpc: (chainId: number, rpcUrl: string) => void
+  removeRpcOverride: (chainId: number) => void
+  rpcOverrides: Record<number, string>
+  getDefaultRpc: (chainId: number) => string
+}
+
+export const ChainsContext = createContext<ChainsContextType>({
+  addChain: () => { },
+  chains: [],
+  updateRpc: () => { },
+  removeRpcOverride: () => { },
+  rpcOverrides: {},
+  getDefaultRpc: () => '',
+})
 
 const queryClient = new QueryClient()
 
 function Root() {
   const [extraChains, setExtraChains] = useState<Chain[]>([])
   const [extraTransports, setExtraTransports] = useState<Record<number, ReturnType<typeof http>>>({})
+  const [rpcOverrides, setRpcOverrides] = useState<Record<number, string>>(() => loadRpcOverrides())
 
   const chains = useMemo<[Chain, ...Chain[]]>(() => ([...baseChains, ...extraChains] as [Chain, ...Chain[]]), [extraChains])
-  const transports = useMemo(() => ({ ...baseTransports, ...extraTransports }), [extraTransports])
+
+  // Build transports: base → extra → rpc overrides
+  const rpcTransports = useMemo(() => {
+    const result: Record<number, ReturnType<typeof http>> = {}
+    for (const [id, url] of Object.entries(rpcOverrides)) {
+      result[Number(id)] = http(url)
+    }
+    return result
+  }, [rpcOverrides])
+
+  const transports = useMemo(() => ({ ...baseTransports, ...extraTransports, ...rpcTransports }), [extraTransports, rpcTransports])
 
   const addChain = (chain: Chain) => {
     if (!chain?.id) return
@@ -115,8 +161,30 @@ function Root() {
     })
 
     const rpcUrl = chain?.rpcUrls?.default?.http?.[0]
-    setExtraTransports((prev) => ({ ...prev, [chain.id]: rpcUrl ? http(rpcUrl) : http() }))
+    // Only set extra transport if no RPC override exists for this chain
+    if (!rpcOverrides[chain.id]) {
+      setExtraTransports((prev) => ({ ...prev, [chain.id]: rpcUrl ? http(rpcUrl) : http() }))
+    }
   }
+
+  const updateRpc = (chainId: number, rpcUrl: string) => {
+    setRpcOverrides((prev) => {
+      const next = { ...prev, [chainId]: rpcUrl }
+      saveRpcOverrides(next)
+      return next
+    })
+  }
+
+  const removeRpcOverride = (chainId: number) => {
+    setRpcOverrides((prev) => {
+      const next = { ...prev }
+      delete next[chainId]
+      saveRpcOverrides(next)
+      return next
+    })
+  }
+
+  const getDefaultRpc = (chainId: number) => getDefaultRpcForChain(chainId, chains)
 
   const config = useMemo(
     () =>
@@ -134,7 +202,7 @@ function Root() {
       <WagmiProvider config={config}>
         <QueryClientProvider client={queryClient}>
           <RainbowKitProvider>
-            <ChainsContext.Provider value={{ addChain, chains }}>
+            <ChainsContext.Provider value={{ addChain, chains, updateRpc, removeRpcOverride, rpcOverrides, getDefaultRpc }}>
               <App />
             </ChainsContext.Provider>
           </RainbowKitProvider>

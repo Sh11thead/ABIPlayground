@@ -727,3 +727,78 @@ body {
   color: #888;
   font-size: 13px;
 }
+
+/* RPC Manager Modal */
+.rpc-modal {
+  width: min(860px, 100%);
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.rpc-modal .modalBody {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.rpc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.rpc-row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  transition: border-color 0.2s;
+}
+
+.rpc-row.rpc-overridden {
+  border-color: var(--accent);
+  border-left: 3px solid var(--accent);
+}
+
+.rpc-chain-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.rpc-chain-name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.rpc-chain-id {
+  font-size: 12px;
+}
+
+.rpc-badge {
+  font-size: 11px;
+  background: var(--accent);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.rpc-input-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.rpc-input {
+  flex: 1;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 13px;
+}
+
+.btn.success {
+  background: #10b981;
+  color: white;
+  border-color: #10b981;
+}
