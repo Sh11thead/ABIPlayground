@@ -12,6 +12,7 @@ import { AddressBookModal } from './components/AddressBookModal'
 import { ToastContainer, useToast } from './components/Toast'
 import { EventLogger } from './components/EventLogger'
 import { RpcManagerModal } from './components/RpcManagerModal'
+import { ERC4626Playground } from './components/ERC4626Playground'
 
 // 辅助：解析 ABI 中的 functions
 function parseFunctions(abi: any[]) {
@@ -90,6 +91,7 @@ function App() {
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
   const [showAddressBook, setShowAddressBook] = useState(false)
   const [showRpcManager, setShowRpcManager] = useState(false)
+  const [activeFeature, setActiveFeature] = useState<'abi' | 'erc4626'>('abi')
 
   useEffect(() => {
     const stored = localStorage.getItem('theme') as 'light' | 'dark'
@@ -208,7 +210,7 @@ function App() {
     <div className="container">
       <ToastContainer toasts={toasts} removeToast={removeToast} />
       <header className="header">
-        <h1 className="title">ABI Playground</h1>
+        <h1 className="title">DeFi Playground Hub</h1>
         <div className="header-actions">
           <button className="theme-toggle" onClick={toggleTheme} title="Toggle Theme">
             {theme === 'dark' ? '☀️' : '🌙'}
@@ -234,6 +236,25 @@ function App() {
         </div>
       </header>
 
+      <section className="feature-switch card">
+        <button
+          className={`feature-btn ${activeFeature === 'abi' ? 'active' : ''}`}
+          onClick={() => setActiveFeature('abi')}
+        >
+          ABI Playground
+        </button>
+        <button
+          className={`feature-btn ${activeFeature === 'erc4626' ? 'active' : ''}`}
+          onClick={() => setActiveFeature('erc4626')}
+        >
+          ERC4626 Playground
+        </button>
+      </section>
+
+      {activeFeature === 'erc4626' && <ERC4626Playground addToast={addToast} />}
+
+      {activeFeature === 'abi' && (
+        <>
       <section className="card">
         <h3 className="section-title">合约配置</h3>
         <div className="form-row">
@@ -434,6 +455,8 @@ function App() {
           )}
         </main>
       </div>
+        </>
+      )}
 
       {showAddressBook && (
         <AddressBookModal

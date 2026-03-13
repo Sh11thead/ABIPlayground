@@ -72,7 +72,7 @@ const plasmaWithIcon = { ...plasma, iconUrl: getChainIcon('Plasma') }
 
 export const baseChains: [Chain, ...Chain[]] = [mainnet, sepolia, polygon, optimism, arbitrum, base, bsc, avalanche, gnosis, plasmaWithIcon, monad, hyperevm, unichain]
 const baseTransports: Record<number, ReturnType<typeof http>> = {
-  [mainnet.id]: http(),
+  [mainnet.id]: http('https://eth.drpc.org'),
   [sepolia.id]: http(),
   [polygon.id]: http(),
   [optimism.id]: http(),
