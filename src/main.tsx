@@ -70,7 +70,52 @@ const unichain: Chain = {
 
 const plasmaWithIcon = { ...plasma, iconUrl: getChainIcon('Plasma') }
 
-export const baseChains: [Chain, ...Chain[]] = [mainnet, sepolia, polygon, optimism, arbitrum, base, bsc, avalanche, gnosis, plasmaWithIcon, monad, hyperevm, unichain]
+const mantle: Chain = {
+  id: 5000,
+  name: 'Mantle',
+  nativeCurrency: { name: 'MNT', symbol: 'MNT', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://rpc.mantle.xyz'] },
+    public: { http: ['https://rpc.mantle.xyz'] },
+  },
+  blockExplorers: {
+    default: { name: 'Mantle Explorer', url: 'https://mantlescan.xyz/' },
+  },
+  // @ts-ignore
+  iconUrl: getChainIcon('Mantle'),
+}
+
+const megaeth: Chain = {
+  id: 4326,
+  name: 'MegaETH',
+  nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://mainnet.megaeth.com/rpc'] },
+    public: { http: ['https://mainnet.megaeth.com/rpc'] },
+  },
+  blockExplorers: {
+    default: { name: 'MegaETH Explorer', url: 'https://mega.etherscan.io/' },
+  },
+  // @ts-ignore
+  iconUrl: getChainIcon('MegaETH'),
+}
+
+const xlayer: Chain = {
+  id: 196,
+  name: 'X Layer',
+  nativeCurrency: { name: 'OKB', symbol: 'OKB', decimals: 18 },
+  rpcUrls: {
+    default: { http: ['https://xlayerrpc.okx.com'] },
+    public: { http: ['https://xlayerrpc.okx.com'] },
+  },
+  blockExplorers: {
+    default: { name: 'OKLink', url: 'https://www.oklink.com/xlayer' },
+  },
+  // @ts-ignore
+  iconUrl: getChainIcon('X Layer'),
+}
+
+export const baseChains: [Chain, ...Chain[]] = [mainnet, sepolia, polygon, optimism, arbitrum, base, bsc, avalanche, gnosis, plasmaWithIcon, monad, hyperevm, unichain, mantle, megaeth, xlayer]
 const baseTransports: Record<number, ReturnType<typeof http>> = {
   [mainnet.id]: http('https://eth.drpc.org'),
   [sepolia.id]: http(),
@@ -85,6 +130,9 @@ const baseTransports: Record<number, ReturnType<typeof http>> = {
   [monad.id]: http('https://rpc3.monad.xyz'),
   [hyperevm.id]: http('https://rpc.hyperliquid.xyz/evm'),
   [unichain.id]: http('https://unichain-rpc.publicnode.com'),
+  [mantle.id]: http('https://rpc.mantle.xyz'),
+  [megaeth.id]: http('https://mainnet.megaeth.com/rpc'),
+  [xlayer.id]: http('https://xlayerrpc.okx.com'),
 }
 
 const RPC_OVERRIDES_KEY = 'abiPlayground_rpcOverrides'
